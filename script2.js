@@ -21,6 +21,7 @@ function SearchMovie() {
       return response.json();
     })
     .then((ress) => {
+      document.querySelector('#movie-list').innerHTML = '';
       if (ress.Response == 'True') {
         const movie = ress.Search;
         movie.map((data) => {
@@ -43,7 +44,8 @@ function SearchMovie() {
    </div>`;
         document.querySelector('#movie-list').innerHTML = erros;
       }
-    });
+    })
+    .catch((err) => console.log(err));
 }
 
 const movie = document.querySelector('#movie-list');
