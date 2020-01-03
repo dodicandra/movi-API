@@ -21,26 +21,28 @@ function SearchMovie() {
       return response.json();
     })
     .then((ress) => {
-      let movie = ress.Search;
-      const card = movie.map(
-        (data) =>
-          `<div class="col-md-4">
-    <div class="card mb-3">
-       <img src="${data.Poster}" class="card-img-top" alt="..">
-       <div class="card-body">
-          <h5 class="card-title">${data.Title}</h5>
-          <h6 class="card-subtitle mb-2 text-muted">${data.Year}</h6>
-          <a href="" key="${data.imdbID}" class="card-link see-detail" data-toggle="modal" data-target="#exampleModal" data-id="${data.imdbID}">See detail</a>
-       </div>
-    </div>
- </div>`
-      );
-
-      document.querySelector('#movie-list').innerHTML = card.join('');
-    })
-    .catch((ress) => {
-      let resp = ress.Error;
-      console.log(resp);
+      if (ress.Response == 'True') {
+        const movie = ress.Search;
+        movie.map((data) => {
+          document.querySelector(
+            '#movie-list'
+          ).innerHTML += `<div class="col-md-4">
+            <div class="card mb-3">
+               <img src="${data.Poster}" class="card-img-top" alt="..">
+               <div class="card-body">
+                  <h5 class="card-title">${data.Title}</h5>
+                  <h6 class="card-subtitle mb-2 text-muted">${data.Year}</h6>
+                  <a href="" key="${data.imdbID}" class="card-link see-detail" data-toggle="modal" data-target="#exampleModal" data-id="${data.imdbID}">See detail</a>
+               </div>
+            </div>
+         </div>`;
+        });
+      } else {
+        const erros = `<div class="col">
+      <h1 class="text-center">${ress.Error}</h1>
+   </div>`;
+        document.querySelector('#movie-list').innerHTML = erros;
+      }
     });
 }
 
@@ -49,7 +51,6 @@ movie.addEventListener('click', function(e) {
   fetch(`http://www.omdbapi.com/?apikey=62c57091&i=${e.target.dataset.id}`)
     .then((res) => res.json())
     .then((ress) => {
-      console.log(ress);
       const modal = document.querySelector('.modal-body');
       const card = `<div class="container-fluid">
     <div class="row">
