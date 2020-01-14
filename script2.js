@@ -18,7 +18,7 @@ sInput.addEventListener('keyup', function(e) {
 
 function SearchMovie() {
   fetch(
-    `http://www.omdbapi.com/?apikey=62c57091&s=${
+    `https://www.omdbapi.com/?apikey=62c57091&s=${
       document.querySelector('#search-input').value
     }`
   )
@@ -36,7 +36,7 @@ function SearchMovie() {
 }
 
 movieList.addEventListener('click', function(e) {
-  fetch(`http://www.omdbapi.com/?apikey=62c57091&i=${e.target.dataset.id}`)
+  fetch(`https://www.omdbapi.com/?apikey=62c57091&i=${e.target.dataset.id}`)
     .then((res) => res.json())
     .then((ress) => {
       modal.innerHTML = modalMovie(ress);
