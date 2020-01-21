@@ -1,110 +1,86 @@
-function searchMovie() {
-	$('#movie-list').html('');
+const sInput = document.querySelector('#search-input');
+const search = document.querySelector('#search-button');
+const movieList = document.querySelector('#movie-list');
+const modal = document.querySelector('.modal-body');
 
-	$.ajax({
-		url: 'https://omdbapi.com',
-		type: 'get',
-		dataType: 'json',
-		data: {
-			apikey: '62c57091',
-			s: $('#search-input').val(),
-		},
-		success: function(result) {
-			if (result.Response == 'True') {
-				let movies = result.Search;
+sInput.addEventListener('keyup', function(e) {
+  const enter = 13;
+  if (e.keyCode === enter) {
+    SearchMovie();
+    sInput.value = '';
+  }
+});
 
-				$.each(movies, (i, data) => {
-					$('#movie-list').append(`
-								
-                  <div class="col-md-4">
-                     <div class="card mb-3">
-                        <img src="${data.Poster}" class="card-img-top" alt="..">
-                        <div class="card-body">
-                           <h5 class="card-title">${data.Title}</h5>
-                           <h6 class="card-subtitle mb-2 text-muted">${data.Year}</h6>
-                           <a href="" key="${data.imdbID}" class="card-link see-detail" data-toggle="modal" data-target="#exampleModal" data-id="${data.imdbID}">See detail</a>
-                        </div>
-                     </div>
-                  </div>
-                  
-               `);
-				});
+search.addEventListener('click', () => {
+  SearchMovie();
+  sInput.value = '';
+});
 
-				$('#search-input').val('');
-			} else {
-				$('#movie-list').html(`
-            <div class="col">
-               <h1 class="text-center">${result.Error}</h1>
-            </div>
-               
-         `);
-			}
-		},
-	});
+const SearchMovie = async () => {
+  const movie = await getMovie(sInput.value);
+  console.log(movie);
+  updateUI(movie);
+};
+
+function getMovie(value) {
+  return fetch(`https://www.omdbapi.com/?apikey=62c57091&s=${value}`)
+    .then((response) => response.json())
+    .then((ress) => ress.Search);
 }
 
-$('#search-button').on('click', function() {
-	searchMovie();
+function updateUI(movie) {
+  let card = '';
+  movie.forEach((m) => (card += cardMovie(m)));
+  movieList.innerHTML = card;
+}
+
+document.addEventListener('click', async function(e) {
+  if (e.target.classList.contains('card-link')) {
+    const imdbID = e.target.dataset.id;
+    const movie = await getMovieCard(imdbID);
+    updateUIDetail(movie);
+  }
 });
 
-$('#search-input').on('keyup', function(e) {
-	const enter = 13;
-	if (e.which === enter) {
-		if ($(this).val() === '') {
-			$('.form-control').prop('placeholder', 'Type a movie name');
-			$('#input-group').append(`
-				<div class="alert alert-danger" role="alert">
-				Type a movie title
-				`);
-			setTimeout(() => {
-				$('.alert').remove();
-			}, 2000);
-		} else {
-			$('.alert-danger').remove();
-			searchMovie();
-		}
-	}
-});
+const getMovieCard = (value) => {
+  return fetch(`https://www.omdbapi.com/?apikey=62c57091&i=${value}`)
+    .then((res) => res.json())
+    .then((ress) => ress);
+};
 
-$('#search-input').keyup(function() {
-	if ($(this).val() == '') {
-		$('#search-button').prop('disabled', true);
-	} else {
-		$('#search-button').prop('disabled', false);
-	}
-});
+const updateUIDetail = (value) => {
+  modal.innerHTML = modalMovie(value);
+};
 
-$('#movie-list').on('click', '.see-detail', function() {
-	$.ajax({
-		url: 'https://omdbapi.com',
-		dataType: 'json',
-		type: 'get',
-		data: {
-			apikey: '62c57091',
-			i: $(this).data('id'),
-		},
-		success: (movie) => {
-			if (movie.Response === 'True') {
-				$('.modal-body').html(`
-	          <div class="container-fluid">
-	             <div class="row">
-	                <div class="col-md-4">
-	                    <img src="${movie.Poster}" class="img-fluid">
-	                </div>
-	                <div class="col-md-8">
-	                  <ul class="list-group">
-	                    <li class="list-group-item"><h3>${movie.Title}</h3></li>
-	                    <li class="list-group-item">Genre : ${movie.Genre}</li>
-	                    <li class="list-group-item">Released : ${movie.Released}</li>
-	                    <li class="list-group-item">Director : ${movie.Director}</li>
-	                    <li class="list-group-item">Actor : ${movie.Actors}</li>
-	                    <li class="list-group-item">Plot : ${movie.Plot}</li>
-	                  </ul>
-	              </div>
-	             </div>
-	          </div>
-	          `);
-			}
-		},
-	});
-});
+const modalMovie = (data) => {
+  return `<div class="container-fluid">
+  <div class="row">
+     <div class="col-md-3">
+         <img src="${data.Poster}" class="img-fluid">
+     </div>
+     <div class="col-md-8">
+       <ul class="list-group">
+         <li class="list-group-item"><h3>${data.Title}</h3></li>
+         <li class="list-group-item">Genre : ${data.Genre}</li>
+         <li class="list-group-item">Released : ${data.Released}</li>
+         <li class="list-group-item">Director : ${data.Director}</li>
+         <li class="list-group-item">Actor : ${data.Actors}</li>
+         <li class="list-group-item">Plot : ${data.Plot}</li>
+       </ul>
+   </div>
+  </div>
+</div>`;
+};
+
+const cardMovie = (data) => {
+  return `<div class="col-md-4">
+  <div class="card mb-3">
+     <img src="${data.Poster}" class="card-img-top" alt="..">
+     <div class="card-body">
+        <h5 class="card-title">${data.Title}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">${data.Year}</h6>
+        <a href="" key="${data.imdbID}" class="card-link see-detail" data-toggle="modal" data-target="#exampleModal" data-id="${data.imdbID}">See detail</a>
+     </div>
+  </div>
+</div>`;
+};
