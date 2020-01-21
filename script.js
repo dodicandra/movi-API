@@ -35,10 +35,10 @@ const updateUI = (movie) => {
     Search.forEach((m) => (card += cardMovie(m)));
     movieList.innerHTML = card;
   } else {
-    const erros = `<div class="col">
+    const UIerros = `<div class="col">
       <h1 class="text-center">${Error}</h1>
    </div>`;
-    movieList.innerHTML = erros;
+    movieList.innerHTML = UIerros;
   }
 };
 
