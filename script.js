@@ -2,6 +2,7 @@ const sInput = document.querySelector('#search-input');
 const search = document.querySelector('#search-button');
 const movieList = document.querySelector('#movie-list');
 const modal = document.querySelector('.modal-body');
+const errors = document.querySelector('#error');
 
 sInput.addEventListener('keyup', function(e) {
   const enter = 13;
@@ -17,29 +18,40 @@ search.addEventListener('click', () => {
 });
 
 const SearchMovie = async () => {
-  const movie = await getMovie(sInput.value);
-  updateUI(movie);
+  try {
+    errors.innerHTML = '';
+    const movie = await getMovie(sInput.value);
+    updateUI(movie);
+  } catch (error) {
+    console.log(error);
+    errors.innerHTML = `<div class="alert alert-danger" >
+    ${error}
+  </div>`;
+  }
 };
 
 const getMovie = (value) => {
   return fetch(`https://www.omdbapi.com/?apikey=62c57091&s=${value}`)
-    .then((response) => response.json())
-    .then((ress) => ress)
-    .catch((err) => console.log(err));
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    })
+    .then((response) => {
+      if (response.Response === 'False') {
+        throw new Error(response.Error);
+      }
+      return response;
+    });
 };
 
 const updateUI = (movie) => {
-  const { Response, Search, Error } = movie;
+  const { Search } = movie;
+  console.log(movie);
   let card = '';
-  if (Response === 'True') {
-    Search.forEach((m) => (card += cardMovie(m)));
-    movieList.innerHTML = card;
-  } else {
-    const UIerros = `<div class="col">
-      <h1 class="text-center">${Error}</h1>
-   </div>`;
-    movieList.innerHTML = UIerros;
-  }
+  Search.map((m) => (card += cardMovie(m)));
+  movieList.innerHTML = card;
 };
 
 document.addEventListener('click', async function(e) {
