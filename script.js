@@ -23,7 +23,6 @@ const SearchMovie = async () => {
     const movie = await getMovie(sInput.value);
     updateUI(movie);
   } catch (error) {
-    console.log(error);
     errors.innerHTML = `<div class="alert alert-danger" >
     ${error}
   </div>`;
